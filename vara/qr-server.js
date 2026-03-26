@@ -18,7 +18,7 @@ const server = http.createServer(async (req, res) => {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Infertility Bestie — Expo Go</title>
+      <title>Vara — Expo Go</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -89,7 +89,7 @@ const server = http.createServer(async (req, res) => {
     <body>
       <div class="card">
         <div class="logo">❤️</div>
-        <h1>Infertility Bestie</h1>
+        <h1>Vara</h1>
         <p class="subtitle">Scan with Expo Go to open on your device</p>
         <img class="qr" src="${qrDataUrl}" alt="QR Code" width="260" height="260" />
         <div class="url-box">${expoUrl}</div>

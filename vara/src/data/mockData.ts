@@ -1,5 +1,5 @@
 export const currentUser = {
-  name: 'Sarah',
+  name: 'Hannah',
   age: 32,
   email: 'sarah@example.com',
   timeTrying: '14 months',
@@ -14,7 +14,7 @@ export const cycleData = {
   currentDay: 8,
   totalDays: 28,
   phase: 'Follicular',
-  nextAppointment: 'March 28, 2026',
+  nextAppointment: 'April 15, 2026',
   medications: [
     { name: 'Letrozole 5mg', time: '8:00 PM', taken: true },
     { name: 'Follistim 150 IU', time: '9:00 PM', taken: false },

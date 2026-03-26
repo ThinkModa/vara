@@ -87,7 +87,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             >
               <Ionicons name="heart" size={32} color={Colors.textWhite} />
             </LinearGradient>
-            <Text style={styles.brandName}>Infertility Bestie</Text>
+            <Text style={styles.brandName}>Vara</Text>
             <Text style={styles.tagline}>Your fertility journey companion</Text>
           </Animated.View>
 
