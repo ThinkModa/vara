@@ -1,13 +1,13 @@
 export const currentUser = {
   name: 'Hannah',
-  age: 32,
+  age: 30,
   email: 'sarah@example.com',
-  timeTrying: '14 months',
+  timeTrying: '24 months',
   diagnosis: 'Unexplained Infertility',
   treatmentStage: 'IVF – Cycle 1',
-  partner: 'Michael',
-  clinic: 'Shady Grove Fertility',
-  doctor: 'Dr. Amanda Chen',
+  partner: 'Maximilian',
+  clinic: 'Ohio Reproductive Medicine',
+  doctor: 'Dr. Rossi',
 };
 
 export const cycleData = {
@@ -45,8 +45,8 @@ export const dashboardInsights = [
   {
     id: '2',
     icon: 'heart',
-    title: 'Self-Care Reminder',
-    body: 'Stimulation can cause bloating and fatigue. Stay hydrated and try gentle walks. You\'re doing amazing.',
+    title: 'Self-Care',
+    body: 'Stimulation can cause bloating and fatigue. Stay hydrated, prioritize balanced meals with lean protein, veggies, and healthy fats, and consider gentle movement. You\'re doing amazing.',
     color: 'pink' as const,
   },
   {
@@ -55,6 +55,13 @@ export const dashboardInsights = [
     title: 'Before Your Next Visit',
     body: 'Ask about your lining thickness and whether dosage adjustments are needed based on today\'s follicle growth.',
     color: 'blue' as const,
+  },
+  {
+    id: '4',
+    icon: 'flask',
+    title: 'Nutrition Insight',
+    body: 'Aim for 3–4 colorful meals daily. Include Omega-3 foods, folate-rich greens, and fermented probiotics for gut support during treatment.',
+    color: 'green' as const,
   },
 ];
 
