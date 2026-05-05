@@ -1,0 +1,5 @@
+.DS_Store
+.claude/settings.local.json
+
+# Local backup copy — do not publish to GitHub
+vara-backup-apr26/
