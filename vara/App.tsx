@@ -6,12 +6,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
+import { AppointmentsProvider } from './src/context/AppointmentsContext';
 import { currentUser, cycleData } from './src/data/mockData';
 import { AppUser, LoginPayload, Medication, OnboardingAnswers } from './src/types/user';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [medications, setMedications] = useState<Medication[]>(cycleData.medications);
   const [user, setUser] = useState<AppUser>({
@@ -32,7 +32,8 @@ export default function App() {
         name: payload.name || prev.name,
         email: payload.email || prev.email,
       }));
-      setNeedsOnboarding(payload.isSignup || !hasCompletedOnboarding);
+      // Onboarding only for new accounts — returning users (Log in) go straight to the app.
+      setNeedsOnboarding(payload.isSignup);
       setIsLoggedIn(true);
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -49,7 +50,6 @@ export default function App() {
       treatmentStage: answers.treatmentStage,
       focusGoal: answers.focusGoal,
     }));
-    setHasCompletedOnboarding(true);
     setNeedsOnboarding(false);
   };
 
@@ -84,14 +84,16 @@ export default function App() {
           needsOnboarding ? (
             <OnboardingScreen onComplete={handleOnboardingComplete} />
           ) : (
-            <NavigationContainer>
-              <AppNavigator
-                onLogout={handleLogout}
-                user={user}
-                medications={medications}
-                onToggleMedication={handleToggleMedication}
-              />
-            </NavigationContainer>
+            <AppointmentsProvider>
+              <NavigationContainer>
+                <AppNavigator
+                  onLogout={handleLogout}
+                  user={user}
+                  medications={medications}
+                  onToggleMedication={handleToggleMedication}
+                />
+              </NavigationContainer>
+            </AppointmentsProvider>
           )
         ) : (
           <LoginScreen onLogin={handleLogin} />

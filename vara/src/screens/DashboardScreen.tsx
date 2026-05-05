@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +16,11 @@ import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constant
 import { CycleRing } from '../components/CycleRing';
 import { InsightCard } from '../components/InsightCard';
 import { cycleData, dashboardInsights } from '../data/mockData';
+import { useAppointments } from '../context/AppointmentsContext';
+import { formatAppointmentDisplayDate, getNextAppointment } from '../utils/appointments';
 import { AppUser, Medication } from '../types/user';
+
+const screenWidth = Dimensions.get('window').width;
 
 interface DashboardScreenProps {
   navigation: any;
@@ -30,6 +35,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   medications,
   onToggleMedication,
 }) => {
+  const { appointments } = useAppointments();
+  const nextVisit = getNextAppointment(appointments);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
@@ -87,7 +94,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               style={styles.appointmentCard}
               activeOpacity={0.85}
               accessibilityRole="button"
-              accessibilityLabel={`Next appointment ${cycleData.nextAppointment}`}
+              accessibilityLabel={
+                nextVisit
+                  ? `Next appointment ${formatAppointmentDisplayDate(nextVisit.dateISO)}`
+                  : 'View appointments'
+              }
+              onPress={() => navigation.navigate('Appointments' as never)}
             >
               <LinearGradient
                 colors={[Colors.gradientIndigo, Colors.accentSecondary]}
@@ -100,9 +112,25 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     <View style={styles.appointmentIconBg}>
                       <Ionicons name="calendar" size={20} color={Colors.accentPrimary} />
                     </View>
-                    <View>
+                    <View style={styles.appointmentTextCol}>
                       <Text style={styles.appointmentLabel}>Next Appointment</Text>
-                      <Text style={styles.appointmentDate}>{cycleData.nextAppointment}</Text>
+                      {nextVisit ? (
+                        <>
+                          <Text style={styles.appointmentDate}>
+                            {formatAppointmentDisplayDate(nextVisit.dateISO)}
+                          </Text>
+                          <Text style={styles.appointmentSub} numberOfLines={1}>
+                            {nextVisit.timeLabel} · {nextVisit.title}
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Text style={styles.appointmentDate}>Nothing scheduled</Text>
+                          <Text style={styles.appointmentSub} numberOfLines={1}>
+                            Tap to add visits & reminders
+                          </Text>
+                        </>
+                      )}
                     </View>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
@@ -283,10 +311,20 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.medium,
     color: 'rgba(255,255,255,0.8)',
   },
+  appointmentTextCol: {
+    flex: 1,
+    maxWidth: screenWidth - 140,
+  },
   appointmentDate: {
     fontSize: FontSize.base,
     fontWeight: FontWeight.semibold,
     color: Colors.textWhite,
+  },
+  appointmentSub: {
+    fontSize: FontSize.xs,
+    fontWeight: FontWeight.regular,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 4,
   },
   statsRow: {
     flexDirection: 'row',

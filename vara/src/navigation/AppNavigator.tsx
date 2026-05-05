@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
 import { FontSize, FontWeight } from '../constants/spacing';
@@ -8,9 +9,12 @@ import { TrackingScreen } from '../screens/TrackingScreen';
 import { LabResultsScreen } from '../screens/LabResultsScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { AppointmentsScreen } from '../screens/AppointmentsScreen';
+import { useAppointments } from '../context/AppointmentsContext';
 import { AppUser, Medication } from '../types/user';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 interface AppNavigatorProps {
   onLogout: () => void;
@@ -19,16 +23,16 @@ interface AppNavigatorProps {
   onToggleMedication: (index: number) => void;
 }
 
-export const AppNavigator: React.FC<AppNavigatorProps> = ({
+function MainTabNavigator({
   onLogout,
   user,
   medications,
   onToggleMedication,
-}) => {
+}: AppNavigatorProps) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color, size: _s }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
           switch (route.name) {
@@ -96,4 +100,41 @@ export const AppNavigator: React.FC<AppNavigatorProps> = ({
       />
     </Tab.Navigator>
   );
+}
+
+export const AppNavigator: React.FC<AppNavigatorProps> = (props) => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        cardStyle: { backgroundColor: Colors.bgPrimary },
+      }}
+    >
+      <Stack.Screen name="MainTabs" options={{ headerShown: false }}>
+        {() => <MainTabNavigator {...props} />}
+      </Stack.Screen>
+      <Stack.Screen
+        name="Appointments"
+        options={{
+          title: 'Appointments',
+          headerStyle: { backgroundColor: Colors.bgWhite },
+          headerTintColor: Colors.textPrimary,
+          headerShadowVisible: false,
+          headerBackTitleVisible: false,
+        }}
+      >
+        {() => <AppointmentsBridge />}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
 };
+
+function AppointmentsBridge() {
+  const { appointments, addAppointment, updateAppointment } = useAppointments();
+  return (
+    <AppointmentsScreen
+      appointments={appointments}
+      onAddAppointment={addAppointment}
+      onUpdateAppointment={updateAppointment}
+    />
+  );
+}

@@ -28,3 +28,24 @@ export interface OnboardingAnswers {
   treatmentStage: string;
   focusGoal: string;
 }
+
+export type AppointmentType =
+  | 'Ultrasound'
+  | 'Blood draw'
+  | 'Consult'
+  | 'Procedure'
+  | 'Other';
+
+export type AppointmentStatus = 'scheduled' | 'cancelled';
+
+export interface Appointment {
+  id: string;
+  title: string;
+  /** YYYY-MM-DD for sorting and display */
+  dateISO: string;
+  timeLabel: string;
+  location: string;
+  type: AppointmentType;
+  notes?: string;
+  status: AppointmentStatus;
+}

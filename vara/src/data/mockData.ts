@@ -1,3 +1,5 @@
+import type { Appointment } from '../types/user';
+
 export const currentUser = {
   name: 'Hannah',
   age: 30,
@@ -14,7 +16,6 @@ export const cycleData = {
   currentDay: 8,
   totalDays: 28,
   phase: 'Follicular',
-  nextAppointment: 'April 15, 2026',
   medications: [
     { name: 'Letrozole 5mg', time: '8:00 PM', taken: true },
     { name: 'Follistim 150 IU', time: '9:00 PM', taken: false },
@@ -33,6 +34,37 @@ export const cycleData = {
   },
   symptoms: ['Mild bloating', 'Light cramping', 'Fatigue'],
 };
+
+export const initialAppointments: Appointment[] = [
+  {
+    id: 'a1',
+    title: 'Monitoring ultrasound',
+    dateISO: '2026-05-08',
+    timeLabel: '10:30 AM',
+    location: 'Ohio Reproductive Medicine',
+    type: 'Ultrasound',
+    notes: 'Bring insurance card and photo ID.',
+    status: 'scheduled',
+  },
+  {
+    id: 'a2',
+    title: 'Follow-up with Dr. Rossi',
+    dateISO: '2026-05-15',
+    timeLabel: '2:00 PM',
+    location: 'Ohio Reproductive Medicine — Suite 200',
+    type: 'Consult',
+    status: 'scheduled',
+  },
+  {
+    id: 'a3',
+    title: 'Estradiol & LH labs',
+    dateISO: '2026-04-28',
+    timeLabel: '7:30 AM',
+    location: 'Quest Diagnostics — Dublin',
+    type: 'Blood draw',
+    status: 'scheduled',
+  },
+];
 
 export const dashboardInsights = [
   {
