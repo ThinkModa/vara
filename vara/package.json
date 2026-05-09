@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "landing:serve": "npx --yes serve landing -l 3333",
     "qr": "node qr-server.js",
     "start": "expo start",
     "android": "expo start --android",
