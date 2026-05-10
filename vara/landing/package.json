@@ -1,0 +1,8 @@
+{
+  "name": "vara-landing",
+  "private": true,
+  "description": "Static waitlist page for Vara (Vercel build copies assets into public/)",
+  "scripts": {
+    "build": "rm -rf public && mkdir -p public && cp index.html main.js styles.css public/"
+  }
+}
