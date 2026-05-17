@@ -575,3 +575,7 @@ main {
 .site-footer p {
   margin: 0;
 }
+
+.site-footer-copyright {
+  margin-top: var(--space-12);
+}
