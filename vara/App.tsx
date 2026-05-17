@@ -7,6 +7,8 @@ import { LoginScreen } from './src/screens/LoginScreen';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { AppointmentsProvider } from './src/context/AppointmentsContext';
+import { ensureSupabaseSession } from './src/lib/ensureSupabaseSession';
+import { isSupabaseConfigured } from './src/lib/supabaseConfig';
 import { currentUser, cycleData } from './src/data/mockData';
 import { AppUser, LoginPayload, Medication, OnboardingAnswers } from './src/types/user';
 
@@ -35,6 +37,9 @@ export default function App() {
       // Onboarding only for new accounts — returning users (Log in) go straight to the app.
       setNeedsOnboarding(payload.isSignup);
       setIsLoggedIn(true);
+      if (isSupabaseConfigured()) {
+        void ensureSupabaseSession();
+      }
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 400,

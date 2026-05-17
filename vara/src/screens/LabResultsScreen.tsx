@@ -10,19 +10,36 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
 import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constants/spacing';
 import { labResults } from '../data/mockData';
+import { FileUploadSection } from '../components/FileUploadSection';
+import {
+  getImportFabScrollPadding,
+  ImportFabPanel,
+  toggleImportPanelAnimation,
+} from '../components/ImportFabPanel';
+import { useFileUploads } from '../hooks/useFileUploads';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 export const LabResultsScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [importPanelOpen, setImportPanelOpen] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const {
+    uploads,
+    loading: uploadsLoading,
+    cloudStorageEnabled,
+    addUpload,
+    removeUpload,
+  } = useFileUploads('clinical_labs');
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -35,6 +52,11 @@ export const LabResultsScreen: React.FC = () => {
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const toggleImportPanel = () => {
+    toggleImportPanelAnimation();
+    setImportPanelOpen((open) => !open);
   };
 
   const getStatusColor = (status: string) => {
@@ -53,37 +75,41 @@ export const LabResultsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Lab Results</Text>
           <Text style={styles.headerSubtitle}>
-            Tap any result to see what it means for you
+            Blood work and clinic labs — tap any result for details
           </Text>
         </View>
 
-        {/* Summary Banner */}
         <View style={styles.summaryBanner}>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{labResults.filter(l => l.status === 'normal').length}</Text>
+            <Text style={styles.summaryNumber}>{labResults.filter((l) => l.status === 'normal').length}</Text>
             <Text style={styles.summaryLabel}>Normal</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Text style={[styles.summaryNumber, { color: Colors.warning }]}>
-              {labResults.filter(l => l.status === 'low').length}
+              {labResults.filter((l) => l.status === 'low').length}
             </Text>
             <Text style={styles.summaryLabel}>Low</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Text style={[styles.summaryNumber, { color: Colors.error }]}>
-              {labResults.filter(l => l.status === 'high').length}
+              {labResults.filter((l) => l.status === 'high').length}
             </Text>
             <Text style={styles.summaryLabel}>High</Text>
           </View>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: getImportFabScrollPadding(importPanelOpen, insets.bottom) },
+          ]}
+        >
           {labResults.map((lab) => {
             const status = getStatusColor(lab.status);
             const isExpanded = expandedId === lab.id;
@@ -129,8 +155,11 @@ export const LabResultsScreen: React.FC = () => {
                     <View style={[styles.statusBanner, { backgroundColor: status.bg }]}>
                       <Ionicons name={status.icon} size={18} color={status.text} />
                       <Text style={[styles.statusBannerText, { color: status.text }]}>
-                        {lab.status === 'normal' ? 'Within normal range' :
-                         lab.status === 'high' ? 'Above normal range' : 'Below normal range'}
+                        {lab.status === 'normal'
+                          ? 'Within normal range'
+                          : lab.status === 'high'
+                            ? 'Above normal range'
+                            : 'Below normal range'}
                       </Text>
                     </View>
 
@@ -148,9 +177,24 @@ export const LabResultsScreen: React.FC = () => {
               </TouchableOpacity>
             );
           })}
-
-          <View style={styles.bottomSpacer} />
         </ScrollView>
+
+        <ImportFabPanel
+          open={importPanelOpen}
+          onToggle={toggleImportPanel}
+          uploadCount={uploads.length}
+          loading={uploadsLoading}
+          openLabel="Close lab upload"
+          closedLabel="Upload blood work or lab results"
+        >
+          <FileUploadSection
+            variant="clinical_labs"
+            uploads={uploads}
+            cloudStorageEnabled={cloudStorageEnabled}
+            onAddUpload={addUpload}
+            onRemoveUpload={removeUpload}
+          />
+        </ImportFabPanel>
       </Animated.View>
     </SafeAreaView>
   );
@@ -322,8 +366,5 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
     fontStyle: 'italic',
     marginTop: Spacing.xs,
-  },
-  bottomSpacer: {
-    height: Spacing.xl,
   },
 });

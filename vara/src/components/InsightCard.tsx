@@ -45,6 +45,9 @@ const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   calendar: 'calendar-outline',
   flask: 'flask-outline',
   'trending-up': 'trending-up',
+  'water-outline': 'water-outline',
+  'time-outline': 'time-outline',
+  pulse: 'pulse',
 };
 
 export const InsightCard: React.FC<InsightCardProps> = ({ icon, title, body, color, onPress }) => {

@@ -6,8 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../constants/colors';
@@ -15,6 +18,18 @@ import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constant
 import { MedicationCard } from '../components/MedicationCard';
 import { cycleData } from '../data/mockData';
 import { Medication } from '../types/user';
+import { FileUploadSection } from '../components/FileUploadSection';
+import { DeviceInsightsSection } from '../components/DeviceInsightsSection';
+import {
+  getImportFabScrollPadding,
+  ImportFabPanel,
+  toggleImportPanelAnimation,
+} from '../components/ImportFabPanel';
+import { useFileUploads } from '../hooks/useFileUploads';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface TrackingScreenProps {
   medications: Medication[];
@@ -25,10 +40,20 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   medications,
   onToggleMedication,
 }) => {
+  const insets = useSafeAreaInsets();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(cycleData.symptoms);
   const [activeTab, setActiveTab] = useState<'overview' | 'meds' | 'symptoms'>('overview');
+  const [importPanelOpen, setImportPanelOpen] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const {
+    uploads: deviceUploads,
+    loading: uploadsLoading,
+    cloudStorageEnabled,
+    addUpload,
+    removeUpload,
+  } = useFileUploads('device_tracking');
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -50,6 +75,11 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
         ? prev.filter((s) => s !== symptom)
         : [...prev, symptom]
     );
+  };
+
+  const toggleImportPanel = () => {
+    toggleImportPanelAnimation();
+    setImportPanelOpen((open) => !open);
   };
 
   const tabs = [
@@ -90,10 +120,18 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
           ))}
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: getImportFabScrollPadding(importPanelOpen, insets.bottom) },
+          ]}
+        >
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <View>
+              <DeviceInsightsSection uploads={deviceUploads} />
+
               {/* Follicle Visualization */}
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Follicle Sizes</Text>
@@ -289,8 +327,24 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
             </View>
           )}
 
-          <View style={styles.bottomSpacer} />
         </ScrollView>
+
+        <ImportFabPanel
+          open={importPanelOpen}
+          onToggle={toggleImportPanel}
+          uploadCount={deviceUploads.length}
+          loading={uploadsLoading}
+          openLabel="Close device import"
+          closedLabel="Import Inito or Kegg data"
+        >
+          <FileUploadSection
+            variant="device_tracking"
+            uploads={deviceUploads}
+            cloudStorageEnabled={cloudStorageEnabled}
+            onAddUpload={addUpload}
+            onRemoveUpload={removeUpload}
+          />
+        </ImportFabPanel>
       </Animated.View>
     </SafeAreaView>
   );
@@ -558,8 +612,5 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: FontWeight.semibold,
     color: Colors.phase2Text,
-  },
-  bottomSpacer: {
-    height: Spacing.xl,
   },
 });

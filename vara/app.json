@@ -25,6 +25,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Vara to access your photos so you can import lab results and screenshots from Inito, Kegg, and other apps.",
+          "cameraPermission": "Allow Vara to photograph lab printouts and device screens."
+        }
+      ]
+    ]
   }
 }
