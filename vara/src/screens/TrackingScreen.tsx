@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { Colors } from '../constants/colors';
 import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constants/spacing';
 import { MedicationCard } from '../components/MedicationCard';
 import { cycleData } from '../data/mockData';
-import { Medication } from '../types/user';
+import { Medication, AppUser } from '../types/user';
 import { FileUploadSection } from '../components/FileUploadSection';
 import { DeviceInsightsSection } from '../components/DeviceInsightsSection';
 import {
@@ -26,6 +26,9 @@ import {
   toggleImportPanelAnimation,
 } from '../components/ImportFabPanel';
 import { useFileUploads } from '../hooks/useFileUploads';
+import { RoadmapPage } from '../components/roadmap/RoadmapPage';
+import { createInitialPhases } from '../components/roadmap/roadmapData';
+import { getProgress } from '../components/roadmap/roadmapLogic';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -34,15 +37,20 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface TrackingScreenProps {
   medications: Medication[];
   onToggleMedication: (index: number) => void;
+  user: AppUser;
 }
 
 export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   medications,
   onToggleMedication,
+  user,
 }) => {
   const insets = useSafeAreaInsets();
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(cycleData.symptoms);
-  const [activeTab, setActiveTab] = useState<'overview' | 'meds' | 'symptoms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'meds' | 'roadmap'>('overview');
+  const [roadmapProgress, setRoadmapProgress] = useState(() => {
+    const phases = createInitialPhases();
+    return getProgress(phases, {});
+  });
   const [importPanelOpen, setImportPanelOpen] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -63,19 +71,9 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
     }).start();
   }, []);
 
-  const allSymptoms = [
-    'Mild bloating', 'Light cramping', 'Fatigue', 'Headache',
-    'Mood changes', 'Breast tenderness', 'Nausea', 'Hot flashes',
-    'Back pain', 'Insomnia', 'Spotting', 'Increased appetite',
-  ];
-
-  const toggleSymptom = (symptom: string) => {
-    setSelectedSymptoms((prev) =>
-      prev.includes(symptom)
-        ? prev.filter((s) => s !== symptom)
-        : [...prev, symptom]
-    );
-  };
+  const handleRoadmapProgressChange = useCallback((completed: number, total: number) => {
+    setRoadmapProgress({ completed, total, remaining: total - completed, percent: total > 0 ? completed / total : 0 });
+  }, []);
 
   const toggleImportPanel = () => {
     toggleImportPanelAnimation();
@@ -85,8 +83,13 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   const tabs = [
     { key: 'overview' as const, label: 'Overview', icon: 'grid-outline' as const },
     { key: 'meds' as const, label: 'Medications', icon: 'medkit-outline' as const },
-    { key: 'symptoms' as const, label: 'Symptoms', icon: 'body-outline' as const },
+    { key: 'roadmap' as const, label: 'Roadmap', icon: 'map-outline' as const },
   ];
+
+  const headerSubtitle =
+    activeTab === 'roadmap'
+      ? `${roadmapProgress.completed} of ${roadmapProgress.total} questions addressed`
+      : `Day ${cycleData.currentDay} of ${cycleData.totalDays}`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -94,7 +97,17 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Cycle Tracking</Text>
-          <Text style={styles.headerSubtitle}>Day {cycleData.currentDay} of {cycleData.totalDays}</Text>
+          <Text style={styles.headerSubtitle}>{headerSubtitle}</Text>
+          {activeTab === 'roadmap' && (
+            <View style={styles.headerProgressBar}>
+              <View
+                style={[
+                  styles.headerProgressFill,
+                  { width: `${roadmapProgress.percent * 100}%` },
+                ]}
+              />
+            </View>
+          )}
         </View>
 
         {/* Tab Bar */}
@@ -285,46 +298,9 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
             </View>
           )}
 
-          {/* Symptoms Tab */}
-          {activeTab === 'symptoms' && (
-            <View>
-              <Text style={styles.symptomInstructions}>
-                Tap to log symptoms you're experiencing today
-              </Text>
-              <View style={styles.symptomGrid}>
-                {allSymptoms.map((symptom) => {
-                  const isSelected = selectedSymptoms.includes(symptom);
-                  return (
-                    <TouchableOpacity
-                      key={symptom}
-                      style={[styles.symptomChip, isSelected && styles.symptomChipSelected]}
-                      onPress={() => toggleSymptom(symptom)}
-                      activeOpacity={0.7}
-                      accessibilityRole="button"
-                      accessibilityLabel={symptom}
-                      accessibilityState={{ selected: isSelected }}
-                    >
-                      <Ionicons
-                        name={isSelected ? 'checkmark-circle' : 'add-circle-outline'}
-                        size={16}
-                        color={isSelected ? Colors.accentPrimary : Colors.textTertiary}
-                      />
-                      <Text style={[styles.symptomText, isSelected && styles.symptomTextSelected]}>
-                        {symptom}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {selectedSymptoms.length > 0 && (
-                <View style={styles.selectedSection}>
-                  <Text style={styles.selectedTitle}>
-                    {selectedSymptoms.length} symptom{selectedSymptoms.length !== 1 ? 's' : ''} logged today
-                  </Text>
-                </View>
-              )}
-            </View>
+          {/* Roadmap Tab */}
+          {activeTab === 'roadmap' && (
+            <RoadmapPage userAge={user.age} onProgressChange={handleRoadmapProgressChange} />
           )}
 
         </ScrollView>
@@ -373,6 +349,18 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.regular,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
+  },
+  headerProgressBar: {
+    height: 4,
+    backgroundColor: Colors.divider,
+    borderRadius: 2,
+    marginTop: Spacing.sm,
+    overflow: 'hidden',
+  },
+  headerProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.accentPrimary,
+    borderRadius: 2,
   },
   tabBar: {
     flexDirection: 'row',
@@ -566,51 +554,5 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: FontWeight.semibold,
     color: Colors.accentPrimary,
-  },
-  symptomInstructions: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.md,
-  },
-  symptomGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-  },
-  symptomChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 9999,
-    backgroundColor: Colors.bgWhite,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 6,
-  },
-  symptomChipSelected: {
-    backgroundColor: '#EEF2FF',
-    borderColor: Colors.accentPrimary,
-  },
-  symptomText: {
-    fontSize: FontSize.sm,
-    fontWeight: FontWeight.medium,
-    color: Colors.textSecondary,
-  },
-  symptomTextSelected: {
-    color: Colors.accentPrimary,
-    fontWeight: FontWeight.semibold,
-  },
-  selectedSection: {
-    marginTop: Spacing.lg,
-    padding: Spacing.md,
-    backgroundColor: Colors.phase2Bg,
-    borderRadius: BorderRadius.md,
-    alignItems: 'center',
-  },
-  selectedTitle: {
-    fontSize: FontSize.sm,
-    fontWeight: FontWeight.semibold,
-    color: Colors.phase2Text,
   },
 });

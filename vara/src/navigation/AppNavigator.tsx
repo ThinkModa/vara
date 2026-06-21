@@ -89,6 +89,7 @@ function MainTabNavigator({
           <TrackingScreen
             medications={medications}
             onToggleMedication={onToggleMedication}
+            user={user}
           />
         )}
       />
