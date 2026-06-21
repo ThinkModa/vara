@@ -89,3 +89,49 @@
     }
   });
 })();
+
+/**
+ * Preview / feedback links — configured via window.VARA_PREVIEW_URL and VARA_FEEDBACK_URL
+ */
+(function () {
+  const previewUrl =
+    typeof window.VARA_PREVIEW_URL === 'string' ? window.VARA_PREVIEW_URL.trim() : '';
+  const feedbackUrl =
+    typeof window.VARA_FEEDBACK_URL === 'string' ? window.VARA_FEEDBACK_URL.trim() : '';
+
+  const previewOpenLink = document.getElementById('preview-open-link');
+  const previewLinkNote = document.getElementById('preview-link-note');
+  const feedbackLink = document.getElementById('feedback-link');
+  const successFeedbackLink = document.getElementById('success-feedback-link');
+
+  if (feedbackUrl) {
+    if (feedbackLink) feedbackLink.href = feedbackUrl;
+    if (successFeedbackLink) successFeedbackLink.href = feedbackUrl;
+    if (feedbackUrl.startsWith('mailto:')) {
+      if (feedbackLink) feedbackLink.target = '_self';
+      if (successFeedbackLink) successFeedbackLink.target = '_self';
+    } else {
+      if (feedbackLink) {
+        feedbackLink.target = '_blank';
+        feedbackLink.rel = 'noopener noreferrer';
+      }
+      if (successFeedbackLink) {
+        successFeedbackLink.target = '_blank';
+        successFeedbackLink.rel = 'noopener noreferrer';
+      }
+    }
+  }
+
+  if (previewUrl && previewOpenLink) {
+    previewOpenLink.href = previewUrl;
+    previewOpenLink.target = '_blank';
+    previewOpenLink.rel = 'noopener noreferrer';
+    if (previewLinkNote) previewLinkNote.textContent = '';
+  } else if (previewOpenLink && previewLinkNote) {
+    previewOpenLink.classList.add('is-disabled');
+    previewOpenLink.setAttribute('aria-disabled', 'true');
+    previewOpenLink.href = '#preview';
+    previewLinkNote.textContent =
+      'Preview link coming soon — we will email waitlist members when it is ready.';
+  }
+})();
