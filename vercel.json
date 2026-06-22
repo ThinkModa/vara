@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd vara/landing && npm run build",
+  "outputDirectory": "vara/landing/public",
+  "installCommand": "echo skip"
+}
