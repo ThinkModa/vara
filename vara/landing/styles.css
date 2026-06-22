@@ -538,6 +538,43 @@ main {
   display: none;
 }
 
+.preview-tip {
+  margin-top: var(--space-12);
+  padding: var(--space-md);
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.preview-tip-title {
+  margin: 0 0 var(--space-xs);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--phase2-text);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.preview-tip-body {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.preview-tip-example {
+  display: inline-block;
+  padding: 1px 8px;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
 .preview-link-note {
   margin-top: var(--space-8) !important;
   font-size: 0.8125rem !important;
