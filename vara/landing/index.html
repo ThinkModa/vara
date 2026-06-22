@@ -119,104 +119,14 @@
           </div>
         </section>
 
-        <section class="preview-section" id="preview" aria-labelledby="preview-heading">
-          <p class="section-title">Early preview</p>
-          <h2 class="section-headline" id="preview-heading">Try Vara while you wait</h2>
-          <p class="preview-intro">
-            We are building in the open. If you are on the waitlist, you can explore an early
-            prototype in Expo Go and tell us what would make Vara truly useful for your journey.
-          </p>
-
-          <ol class="preview-steps">
-            <li class="preview-step">
-              <span class="preview-step-num" aria-hidden="true">1</span>
-              <div>
-                <h3>Download Expo Go</h3>
-                <p>Free on iPhone and Android — no install of Vara itself required.</p>
-                <div class="preview-store-links">
-                  <a
-                    class="btn btn-secondary btn-sm"
-                    id="expo-ios-link"
-                    href="https://apps.apple.com/app/expo-go/id982107779"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    App Store
-                  </a>
-                  <a
-                    class="btn btn-secondary btn-sm"
-                    id="expo-android-link"
-                    href="https://play.google.com/store/apps/details?id=host.exp.exponent"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Google Play
-                  </a>
-                </div>
-              </div>
-            </li>
-            <li class="preview-step">
-              <span class="preview-step-num" aria-hidden="true">2</span>
-              <div>
-                <h3>Open the Vara preview</h3>
-                <p>In Expo Go, tap <strong>Scan QR code</strong> or use the link below.</p>
-                <a class="btn btn-primary btn-sm preview-open-link" id="preview-open-link" href="#">
-                  Open Vara in Expo Go
-                </a>
-                <p class="preview-link-note" id="preview-link-note"></p>
-              </div>
-            </li>
-            <li class="preview-step">
-              <span class="preview-step-num" aria-hidden="true">3</span>
-              <div>
-                <h3>Share your thoughts</h3>
-                <p>
-                  What felt helpful? What is missing? Your suggestions shape what we build next.
-                </p>
-                <a class="btn btn-secondary btn-sm" id="feedback-link" href="#">
-                  Send feedback
-                </a>
-              </div>
-            </li>
-          </ol>
-
-          <p class="preview-disclaimer">
-            This is an early prototype with sample data — not medical advice. Features may change
-            as we learn from you.
-          </p>
-        </section>
-
         <section class="signup-section" id="signup" aria-labelledby="signup-heading">
-          <h2 id="signup-heading">Try Vara early</h2>
-          <p class="signup-intro">
-            Leave your email to join the waitlist. We will only reach out when we have something
-            meaningful to share.
-          </p>
-
-          <div id="success-panel" class="success-panel" role="status" aria-live="polite">
-            <div class="success-badge" aria-hidden="true">✓</div>
-            <h3>You are on the list</h3>
-            <p class="success-lead">
-              Thank you for joining. While you wait for full access, we would love for you to try
-              our early prototype and tell us what you think.
-            </p>
-
-            <div class="success-actions">
-              <a class="btn btn-primary" id="success-preview-link" href="#preview">
-                Try the prototype
-              </a>
-              <a class="btn btn-secondary" id="success-feedback-link" href="#">
-                Share feedback
-              </a>
-            </div>
-
-            <p class="success-footnote">
-              Explore the Treatment Roadmap, cycle tracking, and lab insights — then let us know
-              what would make Vara indispensable for you.
-            </p>
-          </div>
-
           <div id="form-panel">
+            <h2 id="signup-heading">Try Vara early</h2>
+            <p class="signup-intro">
+              Leave your email to join the waitlist. We will only reach out when we have something
+              meaningful to share.
+            </p>
+
             <form id="waitlist-form" novalidate>
               <div class="form-group">
                 <label for="email">Email</label>
@@ -240,6 +150,77 @@
                 By submitting, you agree we may contact you about Vara. Unsubscribe anytime.
               </p>
             </form>
+          </div>
+
+          <div id="success-panel" class="success-panel" role="status" aria-live="polite">
+            <div class="success-badge" aria-hidden="true">✓</div>
+            <h3>You are on the list</h3>
+            <p class="success-lead">
+              Thank you for joining. While you wait for full access, explore our early prototype
+              in Expo Go and tell us what would make Vara truly useful for your journey.
+            </p>
+
+            <div class="preview-section preview-section--success" id="preview" aria-labelledby="preview-heading">
+              <h2 class="preview-heading" id="preview-heading">Try Vara while you wait</h2>
+
+              <ol class="preview-steps">
+                <li class="preview-step">
+                  <span class="preview-step-num" aria-hidden="true">1</span>
+                  <div>
+                    <h4>Download Expo Go</h4>
+                    <p>Free on iPhone and Android — no install of Vara itself required.</p>
+                    <div class="preview-store-links">
+                      <a
+                        class="btn btn-secondary btn-sm"
+                        id="expo-ios-link"
+                        href="https://apps.apple.com/app/expo-go/id982107779"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        App Store
+                      </a>
+                      <a
+                        class="btn btn-secondary btn-sm"
+                        id="expo-android-link"
+                        href="https://play.google.com/store/apps/details?id=host.exp.exponent"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Google Play
+                      </a>
+                    </div>
+                  </div>
+                </li>
+                <li class="preview-step">
+                  <span class="preview-step-num" aria-hidden="true">2</span>
+                  <div>
+                    <h4>Open the Vara preview</h4>
+                    <p>In Expo Go, tap <strong>Scan QR code</strong> or use the link below.</p>
+                    <a class="btn btn-primary btn-sm preview-open-link" id="preview-open-link" href="#">
+                      Open Vara in Expo Go
+                    </a>
+                    <p class="preview-link-note" id="preview-link-note"></p>
+                  </div>
+                </li>
+                <li class="preview-step">
+                  <span class="preview-step-num" aria-hidden="true">3</span>
+                  <div>
+                    <h4>Share your thoughts</h4>
+                    <p>
+                      What felt helpful? What is missing? Your suggestions shape what we build next.
+                    </p>
+                    <a class="btn btn-secondary btn-sm" id="feedback-link" href="#">
+                      Send feedback
+                    </a>
+                  </div>
+                </li>
+              </ol>
+
+              <p class="preview-disclaimer">
+                This is an early prototype with sample data — not medical advice. Features may change
+                as we learn from you.
+              </p>
+            </div>
           </div>
         </section>
       </main>

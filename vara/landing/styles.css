@@ -436,12 +436,25 @@ main {
   color: var(--text-secondary);
 }
 
-/* Early preview / Expo Go */
+/* Early preview / Expo Go — shown after waitlist signup */
 .preview-section {
-  margin-top: var(--space-64);
-  max-width: var(--content-narrow);
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: var(--space-24);
+  text-align: left;
+}
+
+.preview-section--success {
+  margin-top: var(--space-32);
+  padding-top: var(--space-24);
+  border-top: 1px solid var(--divider);
+}
+
+.preview-heading {
+  margin: 0 0 var(--space-16);
+  font-size: 1.125rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
 .preview-intro {
@@ -485,7 +498,8 @@ main {
   justify-content: center;
 }
 
-.preview-step h3 {
+.preview-step h3,
+.preview-step h4 {
   margin: 0 0 var(--space-4);
   font-size: 1rem;
   font-weight: 700;
@@ -656,7 +670,7 @@ main {
 .success-panel {
   display: none;
   text-align: center;
-  padding: var(--space-24) 0;
+  padding: var(--space-8) 0 var(--space-24);
 }
 
 .success-panel.is-visible {
@@ -689,26 +703,8 @@ main {
 }
 
 .success-lead {
-  margin-bottom: var(--space-24) !important;
+  margin-bottom: 0 !important;
   line-height: 1.55;
-}
-
-.success-actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-  margin-bottom: var(--space-24);
-}
-
-.success-actions .btn {
-  width: 100%;
-  min-height: 48px;
-}
-
-.success-footnote {
-  font-size: 0.8125rem !important;
-  color: var(--text-tertiary) !important;
-  line-height: 1.5;
 }
 
 .site-footer {

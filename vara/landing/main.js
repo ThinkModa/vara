@@ -39,7 +39,10 @@
 
   function showSuccess() {
     if (formPanel) formPanel.style.display = 'none';
-    if (successPanel) successPanel.classList.add('is-visible');
+    if (successPanel) {
+      successPanel.classList.add('is-visible');
+      successPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   if (!form) return;
@@ -102,23 +105,14 @@
   const previewOpenLink = document.getElementById('preview-open-link');
   const previewLinkNote = document.getElementById('preview-link-note');
   const feedbackLink = document.getElementById('feedback-link');
-  const successFeedbackLink = document.getElementById('success-feedback-link');
 
-  if (feedbackUrl) {
-    if (feedbackLink) feedbackLink.href = feedbackUrl;
-    if (successFeedbackLink) successFeedbackLink.href = feedbackUrl;
+  if (feedbackUrl && feedbackLink) {
+    feedbackLink.href = feedbackUrl;
     if (feedbackUrl.startsWith('mailto:')) {
-      if (feedbackLink) feedbackLink.target = '_self';
-      if (successFeedbackLink) successFeedbackLink.target = '_self';
+      feedbackLink.target = '_self';
     } else {
-      if (feedbackLink) {
-        feedbackLink.target = '_blank';
-        feedbackLink.rel = 'noopener noreferrer';
-      }
-      if (successFeedbackLink) {
-        successFeedbackLink.target = '_blank';
-        successFeedbackLink.rel = 'noopener noreferrer';
-      }
+      feedbackLink.target = '_blank';
+      feedbackLink.rel = 'noopener noreferrer';
     }
   }
 
