@@ -528,6 +528,16 @@ main {
   pointer-events: none;
 }
 
+.preview-qr {
+  display: block;
+  margin: var(--space-16) auto 0;
+  border-radius: var(--radius-md);
+}
+
+.preview-qr[hidden] {
+  display: none;
+}
+
 .preview-link-note {
   margin-top: var(--space-8) !important;
   font-size: 0.8125rem !important;

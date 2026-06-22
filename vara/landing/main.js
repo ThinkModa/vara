@@ -104,7 +104,10 @@
 
   const previewOpenLink = document.getElementById('preview-open-link');
   const previewLinkNote = document.getElementById('preview-link-note');
+  const previewQr = document.getElementById('preview-qr');
   const feedbackLink = document.getElementById('feedback-link');
+  const previewQrUrl =
+    typeof window.VARA_PREVIEW_QR === 'string' ? window.VARA_PREVIEW_QR.trim() : '';
 
   if (feedbackUrl && feedbackLink) {
     feedbackLink.href = feedbackUrl;
@@ -121,6 +124,10 @@
     previewOpenLink.target = '_blank';
     previewOpenLink.rel = 'noopener noreferrer';
     if (previewLinkNote) previewLinkNote.textContent = '';
+    if (previewQr && previewQrUrl) {
+      previewQr.src = previewQrUrl;
+      previewQr.hidden = false;
+    }
   } else if (previewOpenLink && previewLinkNote) {
     previewOpenLink.classList.add('is-disabled');
     previewOpenLink.setAttribute('aria-disabled', 'true');

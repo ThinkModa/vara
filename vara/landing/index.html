@@ -199,6 +199,14 @@
                     <a class="btn btn-primary btn-sm preview-open-link" id="preview-open-link" href="#">
                       Open Vara in Expo Go
                     </a>
+                    <img
+                      class="preview-qr"
+                      id="preview-qr"
+                      alt="QR code to open Vara in Expo Go"
+                      width="180"
+                      height="180"
+                      hidden
+                    />
                     <p class="preview-link-note" id="preview-link-note"></p>
                   </div>
                 </li>
@@ -236,7 +244,8 @@
     <script>
       window.VARA_WAITLIST_ENDPOINT = 'https://formspree.io/f/mzdokeol';
       // Set your shareable Expo Go link (from `npx expo start --tunnel` or expo.dev publish)
-      window.VARA_PREVIEW_URL = '';
+      window.VARA_PREVIEW_URL = 'exp://u.expo.dev/4b20ace0-378b-4ba1-a10b-bb40e3a42810?runtime-version=1.0.0&channel-name=preview';
+      window.VARA_PREVIEW_QR = 'https://qr.expo.dev/eas-update?projectId=4b20ace0-378b-4ba1-a10b-bb40e3a42810&runtimeVersion=1.0.0&channel=preview';
       // Feedback — mailto, Formspree, or Google Form URL
       window.VARA_FEEDBACK_URL = 'mailto:hello@varafertility.com?subject=Vara%20prototype%20feedback';
     </script>

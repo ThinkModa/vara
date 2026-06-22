@@ -6,6 +6,15 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/4b20ace0-378b-4ba1-a10b-bb40e3a42810"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -34,6 +43,12 @@
           "cameraPermission": "Allow Vara to photograph lab printouts and device screens."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4b20ace0-378b-4ba1-a10b-bb40e3a42810"
+      }
+    },
+    "owner": "baumgartel.hannah"
   }
 }
