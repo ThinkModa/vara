@@ -157,7 +157,7 @@
             <h3>You are on the list</h3>
             <p class="success-lead">
               Thank you for joining. While you wait for full access, explore our early prototype
-              in Expo Go and tell us what would make Vara truly useful for your journey.
+              on your phone and tell us what would make Vara truly useful for your journey.
             </p>
 
             <div class="preview-section preview-section--success" id="preview" aria-labelledby="preview-heading">
@@ -167,47 +167,29 @@
                 <li class="preview-step">
                   <span class="preview-step-num" aria-hidden="true">1</span>
                   <div>
-                    <h4>Download Expo Go</h4>
-                    <p>Free on iPhone and Android — no install of Vara itself required.</p>
-                    <div class="preview-store-links">
-                      <a
-                        class="btn btn-secondary btn-sm"
-                        id="expo-ios-link"
-                        href="https://apps.apple.com/app/expo-go/id982107779"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        App Store
-                      </a>
-                      <a
-                        class="btn btn-secondary btn-sm"
-                        id="expo-android-link"
-                        href="https://play.google.com/store/apps/details?id=host.exp.exponent"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Google Play
-                      </a>
-                    </div>
-                  </div>
-                </li>
-                <li class="preview-step">
-                  <span class="preview-step-num" aria-hidden="true">2</span>
-                  <div>
                     <h4>Open the Vara preview</h4>
-                    <p>In Expo Go, tap <strong>Scan QR code</strong> or use the link below.</p>
+                    <p>Tap the button below on your phone — works in Safari or Chrome, no app install needed.</p>
                     <a class="btn btn-primary btn-sm preview-open-link" id="preview-open-link" href="#">
-                      Open Vara in Expo Go
+                      Open Vara preview
                     </a>
                     <img
                       class="preview-qr"
                       id="preview-qr"
-                      alt="QR code to open Vara in Expo Go"
+                      alt="QR code to open the Vara preview"
                       width="180"
                       height="180"
                       hidden
                     />
                     <p class="preview-link-note" id="preview-link-note"></p>
+                  </div>
+                </li>
+                <li class="preview-step">
+                  <span class="preview-step-num" aria-hidden="true">2</span>
+                  <div>
+                    <h4>Explore the prototype</h4>
+                    <p>
+                      Try the Treatment Roadmap, cycle tracking, medications, and lab insights — all with sample data.
+                    </p>
                   </div>
                 </li>
                 <li class="preview-step">
@@ -244,8 +226,7 @@
     <script>
       window.VARA_WAITLIST_ENDPOINT = 'https://formspree.io/f/mzdokeol';
       // Set your shareable Expo Go link (from `npx expo start --tunnel` or expo.dev publish)
-      window.VARA_PREVIEW_URL = 'exp://u.expo.dev/4b20ace0-378b-4ba1-a10b-bb40e3a42810?runtime-version=1.0.0&channel-name=preview';
-      window.VARA_PREVIEW_QR = 'https://qr.expo.dev/eas-update?projectId=4b20ace0-378b-4ba1-a10b-bb40e3a42810&runtimeVersion=1.0.0&channel=preview';
+      window.VARA_PREVIEW_URL = 'https://vara-app.vercel.app';
       // Feedback — mailto, Formspree, or Google Form URL
       window.VARA_FEEDBACK_URL = 'mailto:hello@varafertility.com?subject=Vara%20prototype%20feedback';
     </script>

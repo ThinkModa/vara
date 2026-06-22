@@ -106,8 +106,10 @@
   const previewLinkNote = document.getElementById('preview-link-note');
   const previewQr = document.getElementById('preview-qr');
   const feedbackLink = document.getElementById('feedback-link');
-  const previewQrUrl =
-    typeof window.VARA_PREVIEW_QR === 'string' ? window.VARA_PREVIEW_QR.trim() : '';
+
+  function qrImageUrl(url) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url);
+  }
 
   if (feedbackUrl && feedbackLink) {
     feedbackLink.href = feedbackUrl;
@@ -124,8 +126,8 @@
     previewOpenLink.target = '_blank';
     previewOpenLink.rel = 'noopener noreferrer';
     if (previewLinkNote) previewLinkNote.textContent = '';
-    if (previewQr && previewQrUrl) {
-      previewQr.src = previewQrUrl;
+    if (previewQr) {
+      previewQr.src = qrImageUrl(previewUrl);
       previewQr.hidden = false;
     }
   } else if (previewOpenLink && previewLinkNote) {
