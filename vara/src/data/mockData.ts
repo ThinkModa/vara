@@ -1,7 +1,7 @@
 import type { Appointment } from '../types/user';
 
 export const currentUser = {
-  name: 'Hannah',
+  name: 'Jane Doe',
   age: 30,
   email: 'sarah@example.com',
   timeTrying: '24 months',
@@ -9,7 +9,7 @@ export const currentUser = {
   treatmentStage: 'IVF – Cycle 1',
   partner: 'Maximilian',
   clinic: 'Ohio Reproductive Medicine',
-  doctor: 'Dr. Rossi',
+  doctor: 'Dr. Vara',
 };
 
 export const cycleData = {
@@ -48,7 +48,7 @@ export const initialAppointments: Appointment[] = [
   },
   {
     id: 'a2',
-    title: 'Follow-up with Dr. Rossi',
+    title: 'Follow-up with Dr. Vara',
     dateISO: '2026-05-15',
     timeLabel: '2:00 PM',
     location: 'Ohio Reproductive Medicine — Suite 200',
