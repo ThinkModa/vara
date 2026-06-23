@@ -18,14 +18,17 @@ import { LoginPayload } from '../types/user';
 
 const { width } = Dimensions.get('window');
 
+const DEMO_LOGIN_EMAIL = 'admin@varafertility.com';
+const DEMO_LOGIN_PASSWORD = 'password';
+
 interface LoginScreenProps {
   onLogin: (payload: LoginPayload) => void;
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(DEMO_LOGIN_EMAIL);
+  const [password, setPassword] = useState(DEMO_LOGIN_PASSWORD);
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 

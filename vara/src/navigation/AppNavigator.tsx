@@ -1,6 +1,8 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
+import { FeedbackBubble } from '../components/FeedbackBubble';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
 import { FontSize, FontWeight } from '../constants/spacing';
@@ -105,29 +107,38 @@ function MainTabNavigator({
 
 export const AppNavigator: React.FC<AppNavigatorProps> = (props) => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        cardStyle: { backgroundColor: Colors.bgPrimary },
-      }}
-    >
-      <Stack.Screen name="MainTabs" options={{ headerShown: false }}>
-        {() => <MainTabNavigator {...props} />}
-      </Stack.Screen>
-      <Stack.Screen
-        name="Appointments"
-        options={{
-          title: 'Appointments',
-          headerStyle: { backgroundColor: Colors.bgWhite },
-          headerTintColor: Colors.textPrimary,
-          headerShadowVisible: false,
-          headerBackTitleVisible: false,
+    <View style={styles.navRoot}>
+      <Stack.Navigator
+        screenOptions={{
+          cardStyle: { backgroundColor: Colors.bgPrimary },
         }}
       >
-        {() => <AppointmentsBridge />}
-      </Stack.Screen>
-    </Stack.Navigator>
+        <Stack.Screen name="MainTabs" options={{ headerShown: false }}>
+          {() => <MainTabNavigator {...props} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Appointments"
+          options={{
+            title: 'Appointments',
+            headerStyle: { backgroundColor: Colors.bgWhite },
+            headerTintColor: Colors.textPrimary,
+            headerShadowVisible: false,
+            headerBackTitleVisible: false,
+          }}
+        >
+          {() => <AppointmentsBridge />}
+        </Stack.Screen>
+      </Stack.Navigator>
+      <FeedbackBubble />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  navRoot: {
+    flex: 1,
+  },
+});
 
 function AppointmentsBridge() {
   const { appointments, addAppointment, updateAppointment } = useAppointments();
