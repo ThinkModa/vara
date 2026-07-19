@@ -87,11 +87,12 @@ function MainTabNavigator({
       />
       <Tab.Screen
         name="Tracking"
-        children={() => (
+        children={({ route }) => (
           <TrackingScreen
             medications={medications}
             onToggleMedication={onToggleMedication}
             user={user}
+            initialTab={(route.params as { tab?: 'overview' | 'meds' | 'cycle' | 'symptoms' | 'roadmap' } | undefined)?.tab}
           />
         )}
       />

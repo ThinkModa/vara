@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../constants/colors';
 import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constants/spacing';
 import { MedicationCard } from '../components/MedicationCard';
+import { PeriodLogCard } from '../components/period/PeriodLogCard';
+import { SymptomChips } from '../components/period/SymptomChips';
 import { cycleData } from '../data/mockData';
 import { Medication, AppUser } from '../types/user';
 import { FileUploadSection } from '../components/FileUploadSection';
@@ -29,24 +31,62 @@ import { useFileUploads } from '../hooks/useFileUploads';
 import { RoadmapPage } from '../components/roadmap/RoadmapPage';
 import { createInitialPhases } from '../components/roadmap/roadmapData';
 import { getProgress } from '../components/roadmap/roadmapLogic';
+import { useCycle } from '../context/CycleContext';
+import {
+  getFlowForDate,
+  getPhaseColors,
+  getSymptomsForDate,
+  isNaturalTracking,
+  todayISO,
+} from '../utils/cycleCalculations';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+type TrackingTab = 'overview' | 'meds' | 'cycle' | 'symptoms' | 'roadmap';
+
 interface TrackingScreenProps {
   medications: Medication[];
   onToggleMedication: (index: number) => void;
   user: AppUser;
+  initialTab?: TrackingTab;
 }
 
 export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   medications,
   onToggleMedication,
   user,
+  initialTab,
 }) => {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<'overview' | 'meds' | 'roadmap'>('overview');
+  const natural = isNaturalTracking(user.treatmentStage, user.mainGoal);
+  const {
+    profile,
+    periodDays,
+    symptomLogs,
+    derived,
+    logPeriodStart,
+    logPeriodEnd,
+    setFlow,
+    toggleSymptom,
+  } = useCycle();
+
+  const defaultTab: TrackingTab = natural ? 'cycle' : 'overview';
+  const [activeTab, setActiveTab] = useState<TrackingTab>(
+    initialTab && (natural
+      ? ['cycle', 'symptoms', 'roadmap'].includes(initialTab)
+      : ['overview', 'meds', 'roadmap'].includes(initialTab))
+      ? initialTab
+      : defaultTab
+  );
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
   const [roadmapProgress, setRoadmapProgress] = useState(() => {
     const phases = createInitialPhases();
     return getProgress(phases, {});
@@ -54,6 +94,8 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   const [importPanelOpen, setImportPanelOpen] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const today = todayISO();
+  const phaseColors = getPhaseColors(derived.phase);
 
   const {
     uploads: deviceUploads,
@@ -72,7 +114,12 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
   }, []);
 
   const handleRoadmapProgressChange = useCallback((completed: number, total: number) => {
-    setRoadmapProgress({ completed, total, remaining: total - completed, percent: total > 0 ? completed / total : 0 });
+    setRoadmapProgress({
+      completed,
+      total,
+      remaining: total - completed,
+      percent: total > 0 ? completed / total : 0,
+    });
   }, []);
 
   const toggleImportPanel = () => {
@@ -80,21 +127,40 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
     setImportPanelOpen((open) => !open);
   };
 
-  const tabs = [
-    { key: 'overview' as const, label: 'Overview', icon: 'grid-outline' as const },
-    { key: 'meds' as const, label: 'Medications', icon: 'medkit-outline' as const },
-    { key: 'roadmap' as const, label: 'Roadmap', icon: 'map-outline' as const },
-  ];
+  const tabs = useMemo(() => {
+    if (natural) {
+      return [
+        { key: 'cycle' as const, label: 'Cycle', icon: 'water-outline' as const },
+        { key: 'symptoms' as const, label: 'Symptoms', icon: 'heart-outline' as const },
+        { key: 'roadmap' as const, label: 'Roadmap', icon: 'map-outline' as const },
+      ];
+    }
+    return [
+      { key: 'overview' as const, label: 'Overview', icon: 'grid-outline' as const },
+      { key: 'meds' as const, label: 'Medications', icon: 'medkit-outline' as const },
+      { key: 'roadmap' as const, label: 'Roadmap', icon: 'map-outline' as const },
+    ];
+  }, [natural]);
 
-  const headerSubtitle =
-    activeTab === 'roadmap'
-      ? `${roadmapProgress.completed} of ${roadmapProgress.total} questions addressed`
-      : `Day ${cycleData.currentDay} of ${cycleData.totalDays}`;
+  const headerSubtitle = useMemo(() => {
+    if (activeTab === 'roadmap') {
+      return `${roadmapProgress.completed} of ${roadmapProgress.total} questions addressed`;
+    }
+    if (natural) {
+      return `Day ${derived.currentDay} of ${derived.totalDays} · ${derived.phase}`;
+    }
+    return `Day ${cycleData.currentDay} of ${cycleData.totalDays}`;
+  }, [activeTab, roadmapProgress, natural, derived]);
+
+  const todaySymptoms = getSymptomsForDate(symptomLogs, today);
+  const todayFlow = getFlowForDate(periodDays, today);
+  const recentLogs = [...symptomLogs]
+    .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+    .slice(0, 5);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Cycle Tracking</Text>
           <Text style={styles.headerSubtitle}>{headerSubtitle}</Text>
@@ -110,7 +176,6 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
           )}
         </View>
 
-        {/* Tab Bar */}
         <View style={styles.tabBar}>
           {tabs.map((tab) => (
             <TouchableOpacity
@@ -140,12 +205,51 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
             { paddingBottom: getImportFabScrollPadding(importPanelOpen, insets.bottom) },
           ]}
         >
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
+          {activeTab === 'cycle' && natural && (
+            <View>
+              <View style={[styles.phaseCard, { backgroundColor: phaseColors.bg }]}>
+                <Text style={[styles.phaseDay, { color: phaseColors.text }]}>
+                  Day {derived.currentDay}
+                </Text>
+                <Text style={[styles.phaseName, { color: phaseColors.text }]}>
+                  {derived.phase} phase
+                </Text>
+                <Text style={styles.phaseHint}>
+                  {derived.daysUntilNextPeriod === 0
+                    ? 'Your period may start today'
+                    : `Period expected in ${derived.daysUntilNextPeriod} days`}
+                </Text>
+              </View>
+
+              <PeriodLogCard
+                isOnPeriod={derived.isOnPeriod}
+                todayISO={today}
+                currentFlow={todayFlow}
+                nextPeriodISO={derived.nextPeriodISO}
+                daysUntilNextPeriod={derived.daysUntilNextPeriod}
+                averageCycleLength={profile.averageCycleLength}
+                periodStartISO={derived.periodStartISO}
+                onLogStart={() => logPeriodStart(today)}
+                onLogEnd={() => logPeriodEnd(today)}
+                onSetFlow={(flow) => setFlow(today, flow)}
+              />
+
+              <DeviceInsightsSection uploads={deviceUploads} />
+            </View>
+          )}
+
+          {activeTab === 'symptoms' && natural && (
+            <SymptomChips
+              selected={todaySymptoms}
+              onToggle={(symptom) => toggleSymptom(today, symptom)}
+              recentLogs={recentLogs}
+            />
+          )}
+
+          {activeTab === 'overview' && !natural && (
             <View>
               <DeviceInsightsSection uploads={deviceUploads} />
 
-              {/* Follicle Visualization */}
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Follicle Sizes</Text>
                 <Text style={styles.sectionDate}>Last updated today</Text>
@@ -215,7 +319,6 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
                 </View>
               </View>
 
-              {/* Hormone Levels */}
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Hormone Levels</Text>
               </View>
@@ -252,8 +355,7 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
             </View>
           )}
 
-          {/* Medications Tab */}
-          {activeTab === 'meds' && (
+          {activeTab === 'meds' && !natural && (
             <View>
               <View style={styles.medProgress}>
                 <LinearGradient
@@ -298,11 +400,9 @@ export const TrackingScreen: React.FC<TrackingScreenProps> = ({
             </View>
           )}
 
-          {/* Roadmap Tab */}
           {activeTab === 'roadmap' && (
             <RoadmapPage userAge={user.age} onProgressChange={handleRoadmapProgressChange} />
           )}
-
         </ScrollView>
 
         <ImportFabPanel
@@ -395,6 +495,26 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.lg,
+  },
+  phaseCard: {
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  phaseDay: {
+    fontSize: FontSize['2xl'],
+    fontWeight: FontWeight.bold,
+  },
+  phaseName: {
+    fontSize: FontSize.base,
+    fontWeight: FontWeight.semibold,
+    marginTop: Spacing.xs,
+  },
+  phaseHint: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    marginTop: Spacing.sm,
   },
   sectionHeader: {
     flexDirection: 'row',

@@ -1,4 +1,5 @@
 import type { Appointment } from '../types/user';
+import type { PeriodCycleSeed } from '../types/cycle';
 
 export const currentUser = {
   name: 'Jane Doe',
@@ -34,6 +35,66 @@ export const cycleData = {
   },
   symptoms: ['Mild bloating', 'Light cramping', 'Fatigue'],
 };
+
+/** Seed for natural cycle / period tracking (demo dates relative to mid-2026). */
+export const periodCycleSeed: PeriodCycleSeed = {
+  profile: {
+    averageCycleLength: 28,
+    averagePeriodLength: 5,
+    lastPeriodStartISO: '2026-07-12',
+    regularity: 'regular',
+  },
+  periodDays: [
+    // Previous cycle
+    { dateISO: '2026-06-14', flow: 'light' },
+    { dateISO: '2026-06-15', flow: 'medium' },
+    { dateISO: '2026-06-16', flow: 'heavy' },
+    { dateISO: '2026-06-17', flow: 'medium' },
+    { dateISO: '2026-06-18', flow: 'spotting' },
+    // Current cycle (started Jul 12)
+    { dateISO: '2026-07-12', flow: 'light' },
+    { dateISO: '2026-07-13', flow: 'medium' },
+    { dateISO: '2026-07-14', flow: 'heavy' },
+    { dateISO: '2026-07-15', flow: 'medium' },
+    { dateISO: '2026-07-16', flow: 'spotting' },
+  ],
+  symptomLogs: [
+    { dateISO: '2026-07-12', symptoms: ['Light cramping', 'Fatigue'] },
+    { dateISO: '2026-07-13', symptoms: ['Mild bloating', 'Light cramping'] },
+    { dateISO: '2026-07-18', symptoms: ['Mild bloating', 'Mood changes'] },
+  ],
+};
+
+export const naturalDashboardInsights = [
+  {
+    id: 'n1',
+    icon: 'sparkles',
+    title: 'Follicular Phase Energy',
+    body: 'Estrogen is rising after your period. Many people feel clearer and more energetic now — a great window for gentle movement and planning ahead.',
+    color: 'purple' as const,
+  },
+  {
+    id: 'n2',
+    icon: 'heart',
+    title: 'Listen to Your Body',
+    body: 'Logging symptoms each day helps you spot patterns across cycles. Even a quick check-in makes future insights more personal.',
+    color: 'pink' as const,
+  },
+  {
+    id: 'n3',
+    icon: 'calendar',
+    title: 'Period Prediction',
+    body: 'Based on your average cycle length, your next period is approaching. Keep logging so predictions stay aligned with your rhythm.',
+    color: 'blue' as const,
+  },
+  {
+    id: 'n4',
+    icon: 'leaf',
+    title: 'Nourish This Phase',
+    body: 'Iron-rich foods and steady hydration support recovery after your period. Think leafy greens, lentils, and warm, balanced meals.',
+    color: 'green' as const,
+  },
+];
 
 export const initialAppointments: Appointment[] = [
   {

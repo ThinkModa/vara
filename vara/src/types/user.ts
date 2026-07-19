@@ -9,6 +9,8 @@ export interface AppUser {
   clinic: string;
   doctor: string;
   focusGoal: string;
+  /** Primary reason they joined — from onboarding */
+  mainGoal?: string;
 }
 
 export interface Medication {
@@ -24,9 +26,14 @@ export interface LoginPayload {
 }
 
 export interface OnboardingAnswers {
-  timeTrying: string;
-  treatmentStage: string;
+  mainGoal: string;
   focusGoal: string;
+  /** Present when mainGoal is "Trying to conceive" */
+  timeTrying?: string;
+  treatmentStage?: string;
+  /** Present for period tracking (and TTC + tracking naturally) */
+  cycleLength?: string;
+  lastPeriodStart?: string;
 }
 
 export type AppointmentType =

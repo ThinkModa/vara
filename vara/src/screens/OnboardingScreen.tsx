@@ -5,45 +5,134 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../constants/colors';
 import { BorderRadius, FontSize, FontWeight, Shadow, Spacing } from '../constants/spacing';
 import { OnboardingAnswers } from '../types/user';
+import { isNaturalTracking } from '../utils/cycleCalculations';
 
 interface OnboardingScreenProps {
   onComplete: (answers: OnboardingAnswers) => void;
 }
 
-const QUESTION_STEPS = [
+type StepKey = keyof OnboardingAnswers;
+
+interface QuestionStep {
+  key: StepKey;
+  title: string;
+  subtitle: string;
+  options: string[];
+}
+
+const MAIN_GOAL_STEP: QuestionStep = {
+  key: 'mainGoal',
+  title: 'What is your main goal with the app?',
+  subtitle: 'We will personalize Vara around what matters most to you.',
+  options: ['Tracking my period', 'Trying to conceive', 'Other'],
+};
+
+const TIME_TRYING_STEP: QuestionStep = {
+  key: 'timeTrying',
+  title: 'How long have you been trying to conceive?',
+  subtitle: 'Take your time — this helps personalize your experience.',
+  options: ['Just getting started', 'Under 6 months', '6-12 months', 'More than 12 months'],
+};
+
+const TREATMENT_STAGE_STEP: QuestionStep = {
+  key: 'treatmentStage',
+  title: 'What stage are you currently in?',
+  subtitle: 'We will tune your dashboard and insights for this phase.',
+  options: ['Tracking naturally', 'IUI', 'IVF cycle 1', 'IVF cycle 2+'],
+};
+
+const CYCLE_STEPS: QuestionStep[] = [
   {
-    key: 'timeTrying' as const,
-    title: 'How long have you been trying to conceive?',
-    subtitle: 'Take your time - this helps personalize your experience.',
-    options: ['Just getting started', 'Under 6 months', '6-12 months', 'More than 12 months'],
+    key: 'cycleLength',
+    title: 'How long is your typical cycle?',
+    subtitle: 'Count from the first day of one period to the day before the next.',
+    options: ['21 days', '28 days', '30 days', '35 days', 'Irregular'],
   },
   {
-    key: 'treatmentStage' as const,
-    title: 'What stage are you currently in?',
-    subtitle: 'We will tune your dashboard and insights for this phase.',
-    options: ['Tracking naturally', 'IUI', 'IVF cycle 1', 'IVF cycle 2+'],
-  },
-  {
-    key: 'focusGoal' as const,
-    title: 'What support matters most right now?',
-    subtitle: 'You can update this later in Profile.',
-    options: ['Medication reminders', 'Symptom tracking', 'Understanding labs', 'Emotional support'],
+    key: 'lastPeriodStart',
+    title: 'When did your last period start?',
+    subtitle: 'An estimate is fine — you can adjust this later in Tracking.',
+    options: ['Today', 'Yesterday', '3 days ago', 'About a week ago', 'Not sure'],
   },
 ];
+
+const PERIOD_FOCUS_STEP: QuestionStep = {
+  key: 'focusGoal',
+  title: 'What support matters most right now?',
+  subtitle: 'You can update this later in Profile.',
+  options: ['Cycle predictions', 'Symptom tracking', 'Understanding my body', 'Emotional support'],
+};
+
+const TTC_FOCUS_STEP: QuestionStep = {
+  key: 'focusGoal',
+  title: 'What support matters most right now?',
+  subtitle: 'You can update this later in Profile.',
+  options: ['Medication reminders', 'Symptom tracking', 'Understanding labs', 'Emotional support'],
+};
+
+const OTHER_FOCUS_STEP: QuestionStep = {
+  key: 'focusGoal',
+  title: 'What would you like help with?',
+  subtitle: 'You can update this later in Profile.',
+  options: ['Cycle & period tracking', 'Learning about fertility', 'Emotional support', 'Just exploring'],
+};
+
+function buildSteps(answers: Partial<OnboardingAnswers>): QuestionStep[] {
+  const goal = answers.mainGoal;
+
+  if (!goal) {
+    return [MAIN_GOAL_STEP];
+  }
+
+  if (goal === 'Tracking my period') {
+    return [MAIN_GOAL_STEP, ...CYCLE_STEPS, PERIOD_FOCUS_STEP];
+  }
+
+  if (goal === 'Other') {
+    return [MAIN_GOAL_STEP, ...CYCLE_STEPS, OTHER_FOCUS_STEP];
+  }
+
+  // Trying to conceive
+  const steps: QuestionStep[] = [MAIN_GOAL_STEP, TIME_TRYING_STEP, TREATMENT_STAGE_STEP];
+  if (isNaturalTracking(answers.treatmentStage ?? '', goal)) {
+    steps.push(...CYCLE_STEPS);
+  }
+  steps.push(TTC_FOCUS_STEP);
+  return steps;
+}
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<OnboardingAnswers>>({});
 
-  const activeStep = QUESTION_STEPS[step];
+  const steps = useMemo(() => buildSteps(answers), [answers]);
+  const activeStep = steps[Math.min(step, steps.length - 1)];
   const selectedValue = answers[activeStep.key];
-  const progress = useMemo(() => ((step + 1) / QUESTION_STEPS.length) * 100, [step]);
+  const progress = useMemo(
+    () => ((Math.min(step, steps.length - 1) + 1) / steps.length) * 100,
+    [step, steps.length]
+  );
 
   const handleSelect = (value: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [activeStep.key]: value,
-    }));
+    setAnswers((prev) => {
+      const next: Partial<OnboardingAnswers> = { ...prev, [activeStep.key]: value };
+
+      if (activeStep.key === 'mainGoal') {
+        // Reset branch-specific answers when goal changes
+        delete next.timeTrying;
+        delete next.treatmentStage;
+        delete next.cycleLength;
+        delete next.lastPeriodStart;
+        delete next.focusGoal;
+      }
+
+      if (activeStep.key === 'treatmentStage' && !isNaturalTracking(value, prev.mainGoal)) {
+        delete next.cycleLength;
+        delete next.lastPeriodStart;
+      }
+
+      return next;
+    });
   };
 
   const handleContinue = () => {
@@ -51,12 +140,45 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       return;
     }
 
-    if (step < QUESTION_STEPS.length - 1) {
+    const tentative: Partial<OnboardingAnswers> = {
+      ...answers,
+      [activeStep.key]: selectedValue,
+    };
+    const nextSteps = buildSteps(tentative);
+
+    if (step < nextSteps.length - 1) {
       setStep((prev) => prev + 1);
       return;
     }
 
-    onComplete(answers as OnboardingAnswers);
+    const mainGoal = (tentative.mainGoal ?? selectedValue) as string;
+    const wantsPeriodQuestions =
+      mainGoal === 'Tracking my period' ||
+      mainGoal === 'Other' ||
+      isNaturalTracking(tentative.treatmentStage ?? '', mainGoal);
+
+    onComplete({
+      mainGoal,
+      focusGoal: (tentative.focusGoal ?? selectedValue) as string,
+      timeTrying:
+        mainGoal === 'Trying to conceive'
+          ? tentative.timeTrying
+          : mainGoal === 'Tracking my period'
+            ? 'Not trying'
+            : 'N/A',
+      treatmentStage:
+        mainGoal === 'Trying to conceive'
+          ? tentative.treatmentStage
+          : mainGoal === 'Tracking my period'
+            ? 'Tracking naturally'
+            : 'Exploring',
+      ...(wantsPeriodQuestions
+        ? {
+            cycleLength: tentative.cycleLength,
+            lastPeriodStart: tentative.lastPeriodStart,
+          }
+        : {}),
+    });
   };
 
   return (
@@ -72,7 +194,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.kicker}>Step {step + 1} of {QUESTION_STEPS.length}</Text>
+          <Text style={styles.kicker}>
+            Step {Math.min(step, steps.length - 1) + 1} of {steps.length}
+          </Text>
           <Text style={styles.title}>{activeStep.title}</Text>
           <Text style={styles.subtitle}>{activeStep.subtitle}</Text>
 
@@ -88,7 +212,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   accessibilityRole="button"
                   accessibilityLabel={option}
                 >
-                  <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>{option}</Text>
+                  <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
+                    {option}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -101,10 +227,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
           activeOpacity={0.8}
           disabled={!selectedValue}
           accessibilityRole="button"
-          accessibilityLabel={step === QUESTION_STEPS.length - 1 ? 'Finish onboarding' : 'Continue'}
+          accessibilityLabel={step >= steps.length - 1 ? 'Finish onboarding' : 'Continue'}
         >
           <Text style={styles.continueText}>
-            {step === QUESTION_STEPS.length - 1 ? 'Finish' : 'Continue'}
+            {step >= steps.length - 1 ? 'Finish' : 'Continue'}
           </Text>
         </TouchableOpacity>
       </LinearGradient>

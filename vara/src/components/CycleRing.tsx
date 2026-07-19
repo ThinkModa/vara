@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Colors } from '../constants/colors';
 import { FontSize, FontWeight, Spacing } from '../constants/spacing';
+import { getPhaseColors, getPhaseGradient } from '../utils/cycleCalculations';
 
 interface CycleRingProps {
   currentDay: number;
@@ -18,7 +19,9 @@ export const CycleRing: React.FC<CycleRingProps> = ({ currentDay, totalDays, pha
   const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = currentDay / totalDays;
+  const progress = Math.min(1, currentDay / Math.max(totalDays, 1));
+  const gradient = getPhaseGradient(phase);
+  const phaseColors = getPhaseColors(phase as 'Menstrual' | 'Follicular' | 'Ovulatory' | 'Luteal');
 
   useEffect(() => {
     Animated.timing(animatedValue, {
@@ -38,8 +41,8 @@ export const CycleRing: React.FC<CycleRingProps> = ({ currentDay, totalDays, pha
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <Defs>
           <SvgGradient id="ringGradient" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0%" stopColor={Colors.gradientIndigo} />
-            <Stop offset="100%" stopColor={Colors.accentTertiary} />
+            <Stop offset="0%" stopColor={gradient.start} />
+            <Stop offset="100%" stopColor={gradient.end} />
           </SvgGradient>
         </Defs>
         <Circle
@@ -66,8 +69,8 @@ export const CycleRing: React.FC<CycleRingProps> = ({ currentDay, totalDays, pha
       <View style={styles.centerContent}>
         <Text style={styles.dayLabel}>Day</Text>
         <Text style={styles.dayNumber}>{currentDay}</Text>
-        <View style={styles.phaseBadge}>
-          <Text style={styles.phaseText}>{phase}</Text>
+        <View style={[styles.phaseBadge, { backgroundColor: phaseColors.bg }]}>
+          <Text style={[styles.phaseText, { color: phaseColors.text }]}>{phase}</Text>
         </View>
       </View>
     </View>

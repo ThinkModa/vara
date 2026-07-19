@@ -29,7 +29,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState(DEMO_LOGIN_EMAIL);
   const [password, setPassword] = useState(DEMO_LOGIN_PASSWORD);
-  const [name, setName] = useState('');
+  const [name, setName] = useState('Vara');
   const [showPassword, setShowPassword] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -58,7 +58,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   }, []);
 
   const toggleMode = () => {
-    setIsSignup(!isSignup);
+    setIsSignup((prev) => {
+      const next = !prev;
+      if (next) {
+        setName((current) => current.trim() || 'Vara');
+      }
+      return next;
+    });
   };
 
   const canSubmit = useMemo(() => {

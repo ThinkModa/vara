@@ -7,15 +7,22 @@ import { LoginScreen } from './src/screens/LoginScreen';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { AppointmentsProvider } from './src/context/AppointmentsContext';
+import { CycleProvider } from './src/context/CycleContext';
 import { ensureSupabaseSession } from './src/lib/ensureSupabaseSession';
 import { isSupabaseConfigured } from './src/lib/supabaseConfig';
-import { currentUser, cycleData } from './src/data/mockData';
+import { currentUser, cycleData, periodCycleSeed } from './src/data/mockData';
 import { AppUser, LoginPayload, Medication, OnboardingAnswers } from './src/types/user';
+import type { PeriodCycleSeed } from './src/types/cycle';
+import {
+  buildSeedFromOnboarding,
+  isNaturalTracking,
+} from './src/utils/cycleCalculations';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [medications, setMedications] = useState<Medication[]>(cycleData.medications);
+  const [cycleSeed, setCycleSeed] = useState<PeriodCycleSeed>(periodCycleSeed);
   const [user, setUser] = useState<AppUser>({
     ...currentUser,
     focusGoal: 'Medication reminders',
@@ -23,7 +30,6 @@ export default function App() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleLogin = (payload: LoginPayload) => {
-    // Fade out login, fade in main app
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 300,
@@ -31,10 +37,10 @@ export default function App() {
     }).start(() => {
       setUser((prev) => ({
         ...prev,
-        name: payload.name || prev.name,
+        name: payload.isSignup ? payload.name || 'Vara' : payload.name || prev.name,
         email: payload.email || prev.email,
+        ...(payload.isSignup ? { partner: 'John Smith' } : {}),
       }));
-      // Onboarding only for new accounts — returning users (Log in) go straight to the app.
       setNeedsOnboarding(payload.isSignup);
       setIsLoggedIn(true);
       if (isSupabaseConfigured()) {
@@ -49,12 +55,21 @@ export default function App() {
   };
 
   const handleOnboardingComplete = (answers: OnboardingAnswers) => {
+    const treatmentStage = answers.treatmentStage ?? 'Tracking naturally';
+    const natural = isNaturalTracking(treatmentStage, answers.mainGoal);
     setUser((prev) => ({
       ...prev,
-      timeTrying: answers.timeTrying,
-      treatmentStage: answers.treatmentStage,
+      mainGoal: answers.mainGoal,
+      timeTrying: answers.timeTrying ?? (answers.mainGoal === 'Tracking my period' ? 'Not trying' : 'N/A'),
+      treatmentStage,
       focusGoal: answers.focusGoal,
+      diagnosis: natural ? (answers.mainGoal === 'Other' ? 'Exploring' : 'Tracking naturally') : prev.diagnosis,
     }));
+    if (natural) {
+      setCycleSeed(buildSeedFromOnboarding(answers));
+    } else {
+      setCycleSeed(periodCycleSeed);
+    }
     setNeedsOnboarding(false);
   };
 
@@ -73,6 +88,7 @@ export default function App() {
       useNativeDriver: true,
     }).start(() => {
       setIsLoggedIn(false);
+      setCycleSeed(periodCycleSeed);
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 400,
@@ -90,14 +106,16 @@ export default function App() {
             <OnboardingScreen onComplete={handleOnboardingComplete} />
           ) : (
             <AppointmentsProvider>
-              <NavigationContainer>
-                <AppNavigator
-                  onLogout={handleLogout}
-                  user={user}
-                  medications={medications}
-                  onToggleMedication={handleToggleMedication}
-                />
-              </NavigationContainer>
+              <CycleProvider key={`${cycleSeed.profile.lastPeriodStartISO}-${cycleSeed.profile.averageCycleLength}`} initialSeed={cycleSeed}>
+                <NavigationContainer>
+                  <AppNavigator
+                    onLogout={handleLogout}
+                    user={user}
+                    medications={medications}
+                    onToggleMedication={handleToggleMedication}
+                  />
+                </NavigationContainer>
+              </CycleProvider>
             </AppointmentsProvider>
           )
         ) : (

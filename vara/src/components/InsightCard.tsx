@@ -44,6 +44,7 @@ const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   clipboard: 'clipboard-outline',
   calendar: 'calendar-outline',
   flask: 'flask-outline',
+  leaf: 'leaf-outline',
   'trending-up': 'trending-up',
   'water-outline': 'water-outline',
   'time-outline': 'time-outline',

@@ -13,6 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../constants/colors';
 import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '../constants/spacing';
 import { AppUser } from '../types/user';
+import { useCycle } from '../context/CycleContext';
+import { formatDisplayDate, isNaturalTracking } from '../utils/cycleCalculations';
 
 interface ProfileScreenProps {
   onLogout: () => void;
@@ -21,6 +23,8 @@ interface ProfileScreenProps {
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { profile } = useCycle();
+  const natural = isNaturalTracking(user.treatmentStage, user.mainGoal);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -32,10 +36,34 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
 
   const profileFields = [
     { label: 'Age', value: `${user.age} years old`, icon: 'person-outline' as const },
-    { label: 'Time Trying', value: user.timeTrying, icon: 'time-outline' as const },
+    ...(user.mainGoal
+      ? [{ label: 'Main Goal', value: user.mainGoal, icon: 'flag-outline' as const }]
+      : []),
+    ...(user.mainGoal === 'Trying to conceive' || (!user.mainGoal && user.timeTrying !== 'Not trying' && user.timeTrying !== 'N/A')
+      ? [{ label: 'Time Trying', value: user.timeTrying, icon: 'time-outline' as const }]
+      : []),
     { label: 'Diagnosis', value: user.diagnosis, icon: 'medical-outline' as const },
     { label: 'Treatment Stage', value: user.treatmentStage, icon: 'flask-outline' as const },
     { label: 'Current Focus', value: user.focusGoal, icon: 'sparkles-outline' as const },
+    ...(natural
+      ? [
+          {
+            label: 'Cycle Length',
+            value: `${profile.averageCycleLength} days`,
+            icon: 'sync-outline' as const,
+          },
+          {
+            label: 'Cycle Regularity',
+            value: profile.regularity === 'regular' ? 'Regular' : 'Irregular',
+            icon: 'pulse-outline' as const,
+          },
+          {
+            label: 'Last Period Start',
+            value: formatDisplayDate(profile.lastPeriodStartISO),
+            icon: 'calendar-outline' as const,
+          },
+        ]
+      : []),
     { label: 'Clinic', value: user.clinic, icon: 'business-outline' as const },
     { label: 'Doctor', value: user.doctor, icon: 'people-outline' as const },
     { label: 'Partner', value: user.partner, icon: 'heart-outline' as const },
@@ -53,7 +81,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
     <SafeAreaView style={styles.safeArea}>
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          {/* Profile Header */}
           <View style={styles.profileHeader}>
             <LinearGradient
               colors={[Colors.gradientIndigo, Colors.accentTertiary]}
@@ -68,13 +95,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
             <Text style={styles.profileName}>{user.name}</Text>
             <Text style={styles.profileEmail}>{user.email}</Text>
 
-            <View style={styles.treatmentBadge}>
-              <Ionicons name="flask" size={14} color={Colors.phase2Text} />
-              <Text style={styles.treatmentBadgeText}>{user.treatmentStage}</Text>
+            <View style={[styles.treatmentBadge, natural && styles.treatmentBadgeNatural]}>
+              <Ionicons
+                name={natural ? 'leaf' : 'flask'}
+                size={14}
+                color={natural ? Colors.phase4Text : Colors.phase2Text}
+              />
+              <Text
+                style={[
+                  styles.treatmentBadgeText,
+                  natural && styles.treatmentBadgeTextNatural,
+                ]}
+              >
+                {user.treatmentStage}
+              </Text>
             </View>
           </View>
 
-          {/* Journey Info */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Journey</Text>
             <TouchableOpacity accessibilityRole="button" accessibilityLabel="Edit profile">
@@ -107,7 +144,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
             ))}
           </View>
 
-          {/* Subscription */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Subscription</Text>
           </View>
@@ -133,7 +169,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Settings */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Settings</Text>
           </View>
@@ -160,7 +195,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onLogout, user }) 
             ))}
           </View>
 
-          {/* Logout */}
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={onLogout}
@@ -229,10 +263,16 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
     gap: 6,
   },
+  treatmentBadgeNatural: {
+    backgroundColor: Colors.phase4Bg,
+  },
   treatmentBadgeText: {
     fontSize: FontSize.xs,
     fontWeight: FontWeight.semibold,
     color: Colors.phase2Text,
+  },
+  treatmentBadgeTextNatural: {
+    color: Colors.phase4Text,
   },
   sectionHeader: {
     flexDirection: 'row',
